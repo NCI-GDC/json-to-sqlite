@@ -1,24 +1,85 @@
 [build-system]
-requires = ["setuptools>=42", "wheel", "setuptools_scm[toml]>=6.0"]
-build-backend = "setuptools.build_meta"
+requires = ["flit_scm"]
+build-backend = "flit_scm:buildapi"
+
+[project]
+name = "json-to-sqlite"
+description = "json_to_sqlite"
+authors = [
+    {name = "Linghao Song", email = "linghao@uchicago.edu"}
+]
+
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+	"Programming Language :: Python :: 3",
+	"Programming Language :: Python :: 3 :: Only"
+]
+dynamic = ["version"]
+dependencies = [
+    "click",
+    "python-dateutil",
+    "pandas",
+    "sqlalchemy"
+]
+
+[project.optional-dependencies]
+build = [
+  "setuptools_scm",
+  "flit",
+  "twine",
+]
+
+dev = [
+    "black",
+    "detect-secrets==1.4.0",
+    "ruff",
+    "mypy",
+    "pre-commit>=2.9.0",
+    "tox",
+]
+
+test = [
+    "coverage[toml]",
+    "pytest",
+]
+
+type = [
+    "types-click",
+]
+
+[project.urls]
+homepage = "https://github.com/NCI-GDC/json-to-sqlite"
+
+[project.scripts]
+"json_to_sqlite" = "json_to_sqlite.__main__:main"
 
 [tool.setuptools_scm]
-local_scheme = "dirty-tag"
-version_scheme = "release-branch-semver"
 write_to = "json_to_sqlite/_version.py"
+local_scheme = "dirty-tag"
+version_scheme = "python-simplified-semver"
 fallback_version = "0"
 
-[tool.black]
-line-length = 88
-skip-string-normalization = true
-target-version = ['py38']
+[tool.coverage.run]
+source = ["json_to_sqlite"]
+branch = true
+parallel = true
 
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses=true
-line_length = 88
+[tool.flit.module]
+name = "json_to_sqlite"
+
+[tool.flit.sdist]
+include = ["json_to_sqlite/_version.py"]
+exclude = [
+        ".*",
+        "dev-requirements.*",
+        "Dockerfile",
+        "Jenkinsfile",
+        "*travis.yml",
+        "tox.ini",
+]
 
 [tool.mypy]
 python_version = 3.8
@@ -26,9 +87,83 @@ disallow_untyped_defs = true
 warn_return_any = true
 warn_unused_configs = true
 
-[[tool.mypy.overrides]]
-module = [
-        "pandas",
-        "sqlalchemy",
+[tool.coverage.report]
+show_missing = true
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
 ]
-ignore_missing_imports = true
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+target-version = 'py39'
+
+[tool.ruff.lint]
+# Enable pycodestyle (`E`) and Pyflakes (`F`) codes by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = ["E501"]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+# Enable auto-formatting of code examples in docstrings. Markdown,
+# reStructuredText code/literal blocks and doctests are all supported.
+#
+# This is currently disabled by default, but it is planned for this
+# to be opt-out in the future.
+docstring-code-format = false
+
+# Set the line length limit used when formatting code snippets in
+# docstrings.
+#
+# This only has an effect when the `docstring-code-format` setting is
+# enabled.
+docstring-code-line-length = "dynamic"
