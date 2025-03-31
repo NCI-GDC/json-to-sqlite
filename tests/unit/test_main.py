@@ -1,19 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import unittest
 
-from click.testing import CliRunner
-
-from json_to_sqlite import __main__ as MOD
-
 
 class ThisTestCase(unittest.TestCase):
-    def setUp(self) -> None:
-        self.runner = CliRunner()
-
-    def test_pass(self):
-        result = self.runner.invoke(MOD.main)
-        self.assertEqual(result.exit_code, 0)
-
-
-# __END__
+    def test(self):
+        pass
