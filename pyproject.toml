@@ -48,6 +48,8 @@ test = [
 
 type = [
     "types-click",
+    "pandas-stubs",
+    "types-sqlalchemy"
 ]
 
 [project.urls]
