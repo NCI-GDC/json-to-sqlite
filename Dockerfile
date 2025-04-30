@@ -27,6 +27,4 @@ RUN pip install --no-deps -r requirements.txt \
 
 USER app
 
-ENTRYPOINT ["json_to_sqlite"]
-
-CMD ["--help"]
+CMD ["json_to_sqlite --help"]
