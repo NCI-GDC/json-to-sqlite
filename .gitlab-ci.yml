@@ -20,4 +20,3 @@ stages:
   - build
   - release
   - tag
-
