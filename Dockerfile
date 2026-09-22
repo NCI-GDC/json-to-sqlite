@@ -11,16 +11,19 @@ dnf --assumeyes install \
     python3-devel \
     gcc \
     git
+dnf clean all
 EOF
 
 COPY . /json_to_sqlite
 
 WORKDIR /json_to_sqlite
 
+# Keep pip/tox isolated from RPM-installed Python packages
 RUN <<EOF
-python3 -m pip install --upgrade pip
-python3 -m pip install tox
-tox -e build
+python3 -m venv /opt/build-venv
+/opt/build-venv/bin/python -m pip install --upgrade pip
+/opt/build-venv/bin/python -m pip install tox
+/opt/build-venv/bin/tox -e build
 EOF
 
 
@@ -46,8 +49,8 @@ COPY requirements.txt /json_to_sqlite/
 WORKDIR /json_to_sqlite
 
 RUN <<EOF
-python3 -m pip install --no-cache-dir --no-deps -r requirements.txt
-python3 -m pip install --no-cache-dir --no-deps *.whl
+python3 -m pip install --no-cache-dir --no-deps --ignore-installed -r requirements.txt
+python3 -m pip install --no-cache-dir --no-deps --ignore-installed *.whl
 rm -f *.whl requirements.txt
 EOF
 
