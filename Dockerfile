@@ -1,30 +1,54 @@
-ARG REGISTRY=docker.osdc.io/ncigdc
-ARG BASE_CONTAINER_VERSION=latest
+ARG REPOSITORY=docker.osdc.io
+ARG BUILDER_TAG=3.1.0
 
-FROM ${REGISTRY}/python3.9-builder:${BASE_CONTAINER_VERSION} as builder
+FROM ${REPOSITORY}/ncigdc/amzn2023-builder:${BUILDER_TAG} AS builder
 
-COPY ./ /json_to_sqlite
+RUN <<EOF
+dnf update --refresh --best --allowerasing -y
+dnf --assumeyes install \
+    python3 \
+    python3-pip \
+    python3-devel \
+    gcc \
+    git
+EOF
+
+COPY . /json_to_sqlite
 
 WORKDIR /json_to_sqlite
 
-RUN pip install tox && tox -e build
+RUN <<EOF
+python3 -m pip install --upgrade pip
+python3 -m pip install tox
+tox -e build
+EOF
 
-FROM ${REGISTRY}/python3.9:${BASE_CONTAINER_VERSION}
+
+FROM ${REPOSITORY}/ncigdc/amzn2023:${BUILDER_TAG}
 
 LABEL org.opencontainers.image.title="json_to_sqlite" \
       org.opencontainers.image.description="json_to_sqlite" \
       org.opencontainers.image.source="https://github.com/NCI-GDC/json-to-sqlite" \
       org.opencontainers.image.vendor="NCI GDC"
 
+RUN <<EOF
+dnf install -y \
+    python3 \
+    python3-pip
+
+dnf clean all
+rm -rf /var/cache/dnf /tmp/* /var/tmp/*
+EOF
+
 COPY --from=builder /json_to_sqlite/dist/*.whl /json_to_sqlite/
 COPY requirements.txt /json_to_sqlite/
 
 WORKDIR /json_to_sqlite
 
-RUN pip install --no-deps -r requirements.txt \
-	&& pip install --no-deps *.whl \
-	&& rm -f *.whl requirements.txt
+RUN <<EOF
+python3 -m pip install --no-cache-dir --no-deps -r requirements.txt
+python3 -m pip install --no-cache-dir --no-deps *.whl
+rm -f *.whl requirements.txt
+EOF
 
-USER app
-
-CMD ["json_to_sqlite --help"]
+CMD ["json_to_sqlite", "--help"]
