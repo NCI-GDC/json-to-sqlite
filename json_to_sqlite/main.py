@@ -36,9 +36,20 @@ def main() -> int:
     job_uuid = args.job_uuid
     table_name = args.table_name
 
+    # Initialize logging and create <job_uuid>.log
+    logger = setup_logging(job_uuid)
+
+    logger.info("Starting json_to_sqlite")
+    logger.info("Input JSON: %s", input_json)
+    logger.info("Job UUID: %s", job_uuid)
+    logger.info("Table name: %s", table_name)
+
     sqlite_name = f"{job_uuid}.db"
     engine_path = f"sqlite:///{sqlite_name}"
-    engine = sqlalchemy.create_engine(engine_path, isolation_level="SERIALIZABLE")
+    engine = sqlalchemy.create_engine(
+        engine_path,
+        isolation_level="SERIALIZABLE",
+    )
 
     time_seconds = time.time()
     datetime_now = str(datetime.datetime.now())
@@ -51,6 +62,9 @@ def main() -> int:
 
     df = pd.DataFrame(data)
     df.to_sql(table_name, engine, if_exists="append")
+
+    logger.info("Successfully wrote SQLite database: %s", sqlite_name)
+
     return 0
 
 

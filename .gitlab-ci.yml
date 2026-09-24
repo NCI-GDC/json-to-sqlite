@@ -1,16 +1,22 @@
----
 include:
-  - project: nci-gdc/gitlab-templates
-    ref: master
-    file:
-      - templates/global/full.yaml
-      - templates/python/full.yaml
+  - component: $CI_SERVER_FQDN/nci-gdc/platform-engineering/generate-version/generate_version@0.4.2
+    inputs:
+      stage: tag
 
-variables:
-  BUILD_PY_VERSION: python3.9
-  RELEASE_PY_VERSION: python3.9
+  - component: $CI_SERVER_FQDN/nci-gdc/gitlab-templates/workflow@1.6.1
 
-.parallel:
-  parallel:
-    matrix:
-      - BUILD_PY_VERSION: [python3.9]
+  - component: $CI_SERVER_FQDN/nci-gdc/gitlab-templates/pre-commit@1.6.1
+
+  - component: $CI_SERVER_FQDN/nci-gdc/gitlab-templates/docker-build@1.6.1
+    inputs:
+      image_version: "4"
+
+  - component: $CI_SERVER_FQDN/nci-gdc/gitlab-templates/docker-release@1.6.1
+
+  - component: $CI_SERVER_FQDN/nci-gdc/gitlab-templates/docker-release-latest@1.6.1
+
+stages:
+  - test
+  - build
+  - release
+  - tag
